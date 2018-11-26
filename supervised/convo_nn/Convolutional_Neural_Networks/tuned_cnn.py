@@ -9,10 +9,6 @@ from keras.layers import Dense
 classifier = Sequential()
 
 ## Step 1 - Convolution Layer
-## Use 32 filters of 3 rows and 3 columns each
-## Use default border mode
-## Specify that all images are 3 channel (one for each primary color) images of 64 x 64 pixels
-## Use rectifier as activation function
 classifier.add(Convolution2D(32, 3, 3, 
                              border_mode = 'same', 
                              input_shape = (64, 64, 3), 
@@ -20,6 +16,14 @@ classifier.add(Convolution2D(32, 3, 3,
 
 ## Step 2 - Max Pooling Layer
 ## Specify pool size of 2 x 2 for max summation
+classifier.add(MaxPooling2D( pool_size = (2, 2) ))
+
+## Can improve performance by adding another convolutional layer
+## Since input is from pooled samples, don't need to specify input shape
+## as Keras will have the shape
+classifier.add(Convolution2D(32, 3, 3, 
+                             border_mode = 'same', 
+                             activation = 'relu' ))
 classifier.add(MaxPooling2D( pool_size = (2, 2) ))
 
 ## Step 3 - Flattening
@@ -32,6 +36,8 @@ classifier.add(Flatten())
 ### Use rectifier as activation again
 classifier.add(Dense(output_dim = 128, 
                     activation = 'relu'))
+
+## Can also improve performance by adding another hidden layer
 
 ### Add output layer
 ### Use sigmoid function as activation
@@ -88,17 +94,3 @@ classifier.fit_generator(training_set,
                          nb_epoch = 25,
                          validation_data = test_set,
                          nb_val_samples = 2000)
-
-# Part 3 - Making predicions
-import numpy as np
-from keras.preprocessing import image
-
-test_img = image.load_img('dataset/single_prediction/cat_or_dog_1.jpg', 
-                          target_size = (64, 64))
-img_array = image.img_to_array(test_img)
-img_array = np.expand_dims(img_array, axis = 0)
-
-classifier.predict(img_array)
-
-## Get whether 1 equals cat or dog
-training_set.class_indices
